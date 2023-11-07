@@ -12,3 +12,5 @@ PyCaptureText is a program that allows you to capture text from an area on the s
 ## Dependencies:
 - Python 3.11+
 - Requirements.txt (see file)
+- Windows (Tested briefly on Linux, but not fully supported)
+- Tesseract

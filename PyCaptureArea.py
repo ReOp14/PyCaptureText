@@ -1,8 +1,8 @@
 import sys
 import os
-from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QStackedLayout, QToolBar, QSizePolicy, QPushButton, QVBoxLayout, QVBoxLayout
+from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QStackedLayout, QToolBar, QSizePolicy, QPushButton, QVBoxLayout, QVBoxLayout, QColorDialog, QLineEdit
 from PyQt6.QtCore import Qt, QPoint, QSize, QEvent
-from PyQt6.QtGui import QMouseEvent, QColor, QPixmap, QScreen, QGuiApplication, QCursor, QHoverEvent
+from PyQt6.QtGui import QMouseEvent, QColor, QPixmap, QScreen, QGuiApplication, QCursor, QHoverEvent, QIcon, QAction
 import pyautogui
 from PIL import Image
 import pytesseract
@@ -37,7 +37,8 @@ class MainWindow(QMainWindow):
         
         # Create the first container
         self.container1 = QWidget()
-        self.container1.setStyleSheet("background-color: rgba(0, 0, 0, 0.0); border: 15px solid rgba(255, 255, 255, 0.5);")
+        self.selected_color = QColor('#ffffff')
+        self.updateBorderColor(self.selected_color)
         
         # Add the containers to the stacked layout
         self.stacked_layout.addWidget(self.container1)
@@ -75,6 +76,20 @@ class MainWindow(QMainWindow):
         resize_button.setStyleSheet("QPushButton { font-size: 16px; color: black; background: rgba(255, 255, 255, 0.9); padding: 6px; border-radius:5px; }")
         toolbar.addWidget(resize_button)
         
+        # Text box for saving the image as a file name
+        self.save_filename = "Screenshot.png"
+        text_box = QLineEdit(self)
+        text_box.setText(self.save_filename)
+        text_box.setStyleSheet("QLineEdit { font-size: 16px; background-color: white; color: black; padding: 6px; border-radius:5px; }")
+        text_box.setFixedWidth(120)
+        text_box.textChanged.connect(self.on_text_changed)
+        toolbar.addWidget(text_box)
+        
+        # Add color picker
+        color_picker_action = QAction(QIcon('images/color-wheel.png'), 'Color Picker', self)
+        color_picker_action.triggered.connect(self.open_color_picker)
+        toolbar.addAction(color_picker_action)
+        
         # Set the toolbar style
         toolbar.setStyleSheet("QToolBar { spacing: 10px; width: 100%; background-color: rgba(255, 255, 255, 0.0); }")
         
@@ -98,6 +113,31 @@ class MainWindow(QMainWindow):
         self.resizing = False
         
         self.show()
+        
+    def on_text_changed(self, text):
+        # print(f"Text changed: {text}")
+        self.save_filename = text
+        
+    def open_color_picker(self):
+        # print("Open Color Picker")
+        # Create a QColorDialog with the initial color and options
+        color_dialog = QColorDialog()
+
+        # Set the options
+        color_dialog.setOption(QColorDialog.ColorDialogOption.NoButtons)
+        color_dialog.setOption(QColorDialog.ColorDialogOption.DontUseNativeDialog)
+        color_dialog.setOption(QColorDialog.ColorDialogOption.ShowAlphaChannel)
+
+        
+        # Open the color picker dialog
+        color = color_dialog.getColor()
+        if color.isValid():
+            self.selected_color = color.name()
+            print("Selected Color: "+self.selected_color)
+            self.updateBorderColor(color)
+            
+    def updateBorderColor(self, color: QColor):
+        self.container1.setStyleSheet(f"background-color: rgba(0, 0, 0, 0.0); border: 15px solid rgba({color.red()}, {color.green()}, {color.blue()}, 0.5);")
         
     def eventFilter(self, source, event):
         pos = None
@@ -269,12 +309,12 @@ class MainWindow(QMainWindow):
         # print("Copy text button clicked")
         _, screenshot = self.save_image('images', 'temp.png', save_to_disk=False)
         text = pytesseract.image_to_string(screenshot)
-        # print("Found Text", text)
+        print("Copied Text: "+text)
         pyperclip.copy(text) # Copy to clipboard
 
     def save_image_button(self):
         # print("Save image button clicked")
-        path, _ = self.save_image()
+        path, _ = self.save_image(file_name=self.save_filename)
         print(f"Screenshot saved as {path}")
         
     def save_image(self, image_dir='images', file_name='screenshot.png', save_to_disk=True) -> str:
