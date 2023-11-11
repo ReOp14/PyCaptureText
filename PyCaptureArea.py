@@ -307,7 +307,7 @@ class MainWindow(QMainWindow):
     def copy_text(self):
         # Implement the copy functionality here
         # print("Copy text button clicked")
-        _, screenshot = self.save_image('images', 'temp.png', save_to_disk=False)
+        _, screenshot = self.save_image('screenshots', 'temp.png', save_to_disk=False)
         text = pytesseract.image_to_string(screenshot)
         print("Copied Text: "+text)
         pyperclip.copy(text) # Copy to clipboard
@@ -317,7 +317,7 @@ class MainWindow(QMainWindow):
         path, _ = self.save_image(file_name=self.save_filename)
         print(f"Screenshot saved as {path}")
         
-    def save_image(self, image_dir='images', file_name='screenshot.png', save_to_disk=True) -> str:
+    def save_image(self, image_dir='screenshots', file_name='screenshot.png', save_to_disk=True) -> str:
         # Get the geometry of the self.main_widget container
         geometry = self.main_widget.frameGeometry()
         pos = self.pos()

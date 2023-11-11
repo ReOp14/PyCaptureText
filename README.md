@@ -1,7 +1,7 @@
 # PyCaptureText
 PyCaptureText is a program that allows you to capture text from an area on the screen and save it as an image or copy the text to the clipboard.
 
-![ProgramImage](images/example.png)
+![ProgramImage](images/demo.png)
 
 ## Features
 - Copy text in capture area
